@@ -4,6 +4,12 @@
 #include <stdlib.h>
 
 
+void push_aux_number(std::string& aux, int num, int size){
+    for(int i = 0; i < size; i++){
+        aux += (num>>(i*8))&0xff;
+    }
+}
+
 CoffFile::CoffFile(){
     head.f_magic = 0x014c;
     head.f_nscns = 0;
@@ -16,12 +22,32 @@ CoffFile::CoffFile(){
         string_table.push_back(0); // init string table size
     }
     string_table_sz = 4;
+    add_symbol(".file\0", 0, -2, 0, 0x67, 1, ".\test.asm");
+}
+CoffFile::CoffFile(std::string file_name){
+    head.f_magic = 0x014c;
+    head.f_nscns = 0;
+    head.f_timdat = time(NULL);
+    head.f_symptr = 20;
+    head.f_nsyms = 0;
+    head.f_opthdr = 0;
+    head.f_flags = 0;
+    for(int i = 0; i < 4; i++){
+        string_table.push_back(0); // init string table size
+    }
+    string_table_sz = 4;
+    add_symbol(".file\0", 0, -2, 0, 0x67, 1, file_name);
 }
 
 
-void CoffFile::add_section(char name[8], int32_t flags, RelocationTable rt, std::vector<unsigned char> data){
+void CoffFile::add_section(std::string name_str, int32_t flags, RelocationTable rt, std::vector<unsigned char> data){
     head.f_symptr+=40;
     section_header_t sh;
+    char name[8] = {0};
+    int name_length = (8>name_str.length())?name_str.length():8;
+    for(int i = 0; i < name_length; i++){
+        name[i] = name_str[i];
+    }
     if((flags & 0xFF) != 0x80) {
         sh = {name, 0, 0, data.size(), head.f_symptr, head.f_symptr+data.size(), 0, rt.relocations.size(), 0, flags, data};
         head.f_symptr+=data.size();
@@ -42,13 +68,19 @@ void CoffFile::add_section(char name[8], int32_t flags, RelocationTable rt, std:
     sections.push_back(sh);
     head.f_nscns += 1;
     rts.push_back(rt);
+
+    // create section symbol
+    std::string aux;
+    push_aux_number(aux, sh.s_size, 4);
+    push_aux_number(aux, sh.s_nreloc, 2);
+    add_section_symbol(std::string(name) + "\0", 0, sections.size(), 0, 3, 1, aux);
 }
 
-void CoffFile::coff_pbn(int32_t number, char size){
-    push_back_number(this->data, number, size);
-}
 
-void CoffFile::add_symbol(std::string name, unsigned long value, short scnum, unsigned short type, unsigned char sclass, unsigned char numaux, std::string aux){
+symbol CoffFile::create_symbol(std::string name, unsigned long value, short scnum, 
+                        unsigned short type, unsigned char sclass, 
+                        unsigned char numaux, std::string aux){
+    symbol created_symbol = {NULL,0,0,0,0,0,NULL};
     char* full_aux;
     if(aux != ""){
         full_aux =  (char*)malloc(18);
@@ -66,8 +98,7 @@ void CoffFile::add_symbol(std::string name, unsigned long value, short scnum, un
                 final_name[i] = 0;
             }
         }
-        symbol s = {final_name, value, scnum, type, sclass, numaux, full_aux};
-        symbols.push_back(s);
+        created_symbol = {final_name, value, scnum, type, sclass, numaux, full_aux};
     } // We need the string table otherwise
     else{
         int offset = string_table.size();
@@ -79,15 +110,32 @@ void CoffFile::add_symbol(std::string name, unsigned long value, short scnum, un
         struct str_offset str_pointer = {0, offset};
         sym_name sn;
         sn.e = str_pointer;
-        symbol s = {sn, value, scnum, type, sclass, numaux, full_aux};
-        symbols.push_back(s);
+        created_symbol = {sn, value, scnum, type, sclass, numaux, full_aux};
     }
     for(int i = 0; i < bss_sections.size(); i++){
         if(scnum == bss_sections[i]){
             sections[bss_sections[i]-1].s_size += 4;
         }
     }
-    head.f_nsyms += 1 + (aux == ""?0:1);
+    head.f_nsyms += 1 + (aux == ""?0:1);                
+    return created_symbol;
+}
+
+void CoffFile::add_section_symbol(std::string name, unsigned long value, short scnum, 
+                        unsigned short type, unsigned char sclass, 
+                        unsigned char numaux, std::string aux){
+    symbol s = create_symbol(name, value, scnum, type, sclass, numaux, aux);
+    symbols.insert(symbols.begin() + scnum, s); // add a section at the section number, assume no duplicates
+                                                // TODO: assume duplicates
+}
+
+void CoffFile::coff_pbn(int32_t number, char size){
+    push_back_number(this->data, number, size);
+}
+
+void CoffFile::add_symbol(std::string name, unsigned long value, short scnum, unsigned short type, unsigned char sclass, unsigned char numaux, std::string aux){
+    symbol s = create_symbol(name, value, scnum, type, sclass, numaux, aux);
+    symbols.push_back(s);
 }
 
 void CoffFile::compile(){
@@ -152,7 +200,7 @@ void CoffFile::compile(){
     }
 
     data.insert(data.end(), string_table.begin(), string_table.end());
-    std::cout << "string table added" << std::endl;
+    std::cout << "String table added" << std::endl;
 
 
     std::cout << "Compiled. size of data: " << data.size() << std::endl;
@@ -164,4 +212,32 @@ std::string CoffFile::get_compiled(){
         compiled += data[i];
     }
     return compiled;
+}
+
+
+relocation CoffFile::get_relocation(std::string symname, int vaddr, int type){
+    relocation reloc = {-1, vaddr, type};
+    int symndx = 0;
+    for(int i = 0; i < symbols.size(); i++){
+        if(symbols[i].e.e.e_zeroes == 0){
+            std::string name = "";
+            for(int stroff = symbols[i].e.e.e_offset; string_table[stroff] != 0; stroff++ ){
+                name += string_table[stroff];
+            }
+            if(name == symname){
+                reloc.r_symndx = symndx;
+                return reloc;
+            }
+        } else {
+            if(symbols[i].e.e_name == symname){
+                reloc.r_symndx = symndx;
+                return reloc;
+            }
+        }
+        symndx += 1;
+        if(symbols[i].e_numaux != 0){
+            symndx += 1;
+        }
+    }
+    return reloc;
 }

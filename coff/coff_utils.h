@@ -64,6 +64,7 @@ class RelocationTable
     public:
     RelocationTable(bool isNull);
     void add_relocation(long r_vaddr, long r_symndx, unsigned short r_type);
+    void add_relocation(relocation r);  
     std::vector<struct relocation> relocations;
     std::vector<char> get_data();
     int get_size();

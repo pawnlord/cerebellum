@@ -16,6 +16,10 @@ void RelocationTable::add_relocation(long r_vaddr, long r_symndx, unsigned short
     relocations.push_back({r_vaddr, r_symndx, r_type});
 }
 
+void RelocationTable::add_relocation(relocation r){
+    relocations.push_back(r);
+}
+
 int RelocationTable::get_size(){
     return relocations.size() * 10;
 }
