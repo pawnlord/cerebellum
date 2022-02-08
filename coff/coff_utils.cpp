@@ -16,12 +16,15 @@ void RelocationTable::add_relocation(long r_vaddr, long r_symndx, unsigned short
     relocations.push_back({r_vaddr, r_symndx, r_type});
 }
 
+void RelocationTable::add_future_relocation(long r_vaddr, std::string name, unsigned short r_type){
+    future_relocations.push_back({r_vaddr, name, r_type});
+}    
 void RelocationTable::add_relocation(relocation r){
     relocations.push_back(r);
 }
 
 int RelocationTable::get_size(){
-    return relocations.size() * 10;
+    return relocations.size() * 10 + future_relocations.size()*10;
 }
 
 std::vector<char> RelocationTable::get_data(){

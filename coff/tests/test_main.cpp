@@ -24,11 +24,11 @@ int main(){
     }));
     cf.add_section(".bss\0\0\0\0", 0xC0300080, null_rt, std::vector<unsigned char>({}));
     RelocationTable text_rt(false);
-    text_rt.add_relocation(3, 0xC, 0x14);
+    text_rt.add_future_relocation(0x3, "GetStdHandle", 0x14);
     text_rt.add_relocation(0xA, 0x10, 0x6);
-    text_rt.add_relocation(0x11, 0xE, 0x6);
-    text_rt.add_relocation(0x17, 0xD, 0x14);
-    text_rt.add_relocation(0x1E, 0xB, 0x14);
+    text_rt.add_future_relocation(0x11, "msg", 0x6);
+    text_rt.add_future_relocation(0x17, "WriteConsoleA", 0x14);
+    text_rt.add_future_relocation(0x1E, "ExitProcess", 0x14);
     std::cout << "text relocations made" << std::endl;
  
     cf.add_section(".text\0\0\0", 0x60500020, text_rt, std::vector<unsigned char>({
@@ -38,6 +38,7 @@ int main(){
     }));
     std::cout << "sections made" << std::endl;
     
+
     cf.compile();
     std::cout << "compiled" << std::endl;
 

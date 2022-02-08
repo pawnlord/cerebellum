@@ -54,18 +54,25 @@ typedef struct {
 } symbol;
 
 struct relocation{
-	long		r_vaddr;	/* Reference Address */
-	long		r_symndx;	/* Symbol index */
+	long		    r_vaddr;	/* Reference Address */
+	long		    r_symndx;	/* Symbol index */
 	unsigned short	r_type;		/* Type of relocation */
 };
 
+struct future_relocation{
+	long		    r_vaddr;	/* Reference Address */
+    std::string     r_name;
+	unsigned short	r_type;		/* Type of relocation */
+};
 class RelocationTable
 {
     public:
     RelocationTable(bool isNull);
     void add_relocation(long r_vaddr, long r_symndx, unsigned short r_type);
+    void add_future_relocation(long r_vaddr, std::string name, unsigned short r_type);
     void add_relocation(relocation r);  
     std::vector<struct relocation> relocations;
+    std::vector<struct future_relocation> future_relocations;
     std::vector<char> get_data();
     int get_size();
     bool isNull;
