@@ -53,7 +53,7 @@ void CoffFile::add_section(std::string name_str, int32_t flags, RelocationTable&
         std::cout << name[i];
     }
     if((flags & 0xFF) != 0x80) {
-        sh = {name, 0, 0, data.size(), head.f_symptr, head.f_symptr+data.size(), 0, rt.relocations.size() + rt.future_relocations.size(), 0, flags, data};
+        sh = {name, 0, 0, (long)data.size(), head.f_symptr, (long)(head.f_symptr+data.size()), 0, (unsigned short)(rt.relocations.size() + rt.future_relocations.size()), 0, flags, data};
         head.f_symptr+=data.size();
         head.f_symptr+=rt.get_size();
     } else {
@@ -111,7 +111,7 @@ symbol CoffFile::create_symbol(std::string name, unsigned long value, short scnu
         }
         string_table.push_back(0);
         string_table_sz += name.size() + 1;
-        struct str_offset str_pointer = {0, offset};
+        struct str_offset str_pointer = {0, (unsigned long)offset};
         sym_name sn;
         sn.e = str_pointer;
         created_symbol = {sn, value, scnum, type, sclass, numaux, full_aux};
@@ -234,7 +234,7 @@ std::string CoffFile::get_compiled(){
 
 
 relocation CoffFile::get_relocation(std::string symname, int vaddr, int type){
-    relocation reloc = {vaddr, -1, type};
+    relocation reloc = {vaddr, -1, (unsigned short)type};
     int symndx = 0;
     for(int i = 0; i < symbols.size(); i++){
         if(symbols[i].e.e.e_zeroes == 0){
