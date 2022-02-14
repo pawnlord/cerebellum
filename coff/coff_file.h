@@ -34,7 +34,7 @@ class CoffFile {
     std::vector<section_header_t> sections;
     std::vector<symbol> symbols;
     std::vector<RelocationTable> rts;
-    std::vector<char> data;
+    std::vector<unsigned char> data;
     std::vector<char> string_table;
     std::vector<int> bss_sections;
     int string_table_sz;

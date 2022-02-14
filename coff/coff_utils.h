@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+void push_back_number(std::vector<unsigned char>& ref, int32_t number, char size);
 void push_back_number(std::vector<char>& ref, int32_t number, char size);
 
 typedef struct {
