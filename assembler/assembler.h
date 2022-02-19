@@ -15,8 +15,10 @@ class AsmObject {
     AsmObject() : rt(false) {}
 
     RelocationTable rt;
-    void add_op_imm(uchar op, uint data, int size);
+    void add_op_imm(uchar op, int data, int size);
     void add_op_imm(uchar op, std::string name, int type, int size);
+    void add_op_rm(uchar op, uint rmbyte, int extra, uint size);
+    void add_op_rm(uchar op, uint rmbyte, std::string name, int type, int size);
     void add_op_plusr(uchar op, register_e reg);
     void add_byte(uchar op); // for anything we dont include
     std::vector<uchar> code;
