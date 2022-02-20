@@ -150,7 +150,6 @@ void CoffFile::fill_reloc_table(RelocationTable& t){
                 t.future_relocations[i].r_type
             )
         );
-        std::cout << t.future_relocations[i].r_name << ": " << t.relocations.back().r_symndx << std::endl;
     }
 }
 
@@ -186,7 +185,6 @@ void CoffFile::compile(){
         data.insert(data.end(), sections[i].data.begin(), sections[i].data.end());
         fill_reloc_table(rts[i]);
         rdata = rts[i].get_data();
-        std::cout << rdata.size() << std::endl;
         data.insert(data.end(), rdata.begin(), rdata.end()); // TODO: possible error
     }
     std::cout << "Sections compiled" << std::endl;
@@ -242,13 +240,11 @@ relocation CoffFile::get_relocation(std::string symname, int vaddr, int type){
             for(int stroff = symbols[i].e.e.e_offset; string_table[stroff] != 0; stroff++ ){
                 name += string_table[stroff];
             }
-            std::cout << "name" << name << std::endl;
             if(name == symname){
                 reloc.r_symndx = symndx;
                 return reloc;
             }
         } else {
-            std::cout << "name" << symbols[i].e.e_name << std::endl;
             if(symbols[i].e.e_name == symname){
                 reloc.r_symndx = symndx;
                 return reloc;
@@ -258,7 +254,6 @@ relocation CoffFile::get_relocation(std::string symname, int vaddr, int type){
         if(symbols[i].e_numaux != 0){
             symndx += 1;
         }
-        std::cout << "ndx " << symndx << std::endl; 
     }
     return reloc;
 }
