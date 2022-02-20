@@ -13,4 +13,7 @@
 !assembler/*.md
 !assembler/*.cpp
 !assembler/*.h
+!assembler/tests
+!assembler/tests/*.cpp
+!assembler/tests/*.bat
 !.gitignore
