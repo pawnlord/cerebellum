@@ -6,23 +6,15 @@ int main(){
     a.add_op_imm(0x6A, arg(0xF5, 1));
     a.add_op_imm(0xE8, "GetStdHandle", 0x14, argsz(4));
     a.add_op_imm(0xA3, "handle", 0x6, argsz(4));
-    // basic print code
-    a.add_op_imm(0x6A, arg(0x0, 1));
-    a.add_op_imm(0x68, "dummy", 0x6, argsz(4));
-    a.add_op_imm(0x6A, arg(0x0F, 1));
-    a.add_op_imm(0x68, "msg", 0x6, argsz(4));
-    a.add_op_rm (0xFF, {0, 5, ESI}, "handle", 0x6, argsz(4));
-    a.add_op_imm(0xE8, "WriteConsoleA", 0x14, argsz(4));
-    
     a.add_op_plusr(0x50, EBP);
     a.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
     a.add_op_rm (0xC7, {1, EBP, EAX}, {0xA, 4, 0, 1}); // MOV [r] imm
     a.add_op_rm (0x8B, {1, EBP, ECX}, arg(0, 1)); // mov r [r]
     a.add_op_rm (0x89, {1, EBP, ECX}, arg(0x1, 1));
-    a.add_op_rm (0x83, {1, EBP, EAX}, {0x30, 4, 0x1, 1});
-    a.add_op_rm (0xC7, {1, EBP, ESP}, {13, 4, 0x2, 1});
-    a.add_op_rm (0xC7, {1, EBP, ESP}, {10, 4, 0x3, 1});
-    a.add_op_rm (0xC7, {1, EBP, ESP}, {0x0, 4, 0x4, 1});
+    a.add_op_rm (0x83, {1, EBP, EAX}, {0x30, 1, 0x1, 1});
+    a.add_op_rm (0xC7, {1, EBP, EAX}, {13, 4, 0x2, 1});
+    a.add_op_rm (0xC7, {1, EBP, EAX}, {10, 4, 0x3, 1});
+    a.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, 0x4, 1});
      
     a.add_op_imm(0x6A, arg(0x0, 1));
     a.add_op_imm(0x68, "dummy", 0x6, argsz(4));
