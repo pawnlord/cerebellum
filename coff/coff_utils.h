@@ -43,7 +43,7 @@ struct str_offset{
 typedef union {
     char* e_name;
     struct str_offset e;
-} sym_name;
+} sym_name; // use this for some black magic later to use only one variable
 typedef struct {
   sym_name e;
   unsigned long e_value;

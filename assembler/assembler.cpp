@@ -14,6 +14,7 @@ void AsmObject::add_op_imm(uchar op, std::string name, int type, arg_t arg){
 void AsmObject::add_op_rm(uchar op, modrm_t rm, arg_t arg){
     code.push_back(op);
     uchar rmbyte = rm.rm;
+    // Create rmbyte to push
     rmbyte += rm.reg << 3;
     rmbyte += rm.mod << 6;
     code.push_back(rmbyte);

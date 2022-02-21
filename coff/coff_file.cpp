@@ -2,6 +2,7 @@
 #include <time.h>
 #include <iomanip>
 #include <stdlib.h>
+#define BSS_FLAG 0x80
 
 
 void push_aux_number(std::string& aux, int num, int size){
@@ -43,6 +44,7 @@ CoffFile::CoffFile(std::string file_name){
 void CoffFile::add_section(std::string name_str, int32_t flags, RelocationTable& rt, std::vector<unsigned char> data){
     head.f_symptr+=40;
     section_header_t sh;
+    // change name into correct type
     char* name = (char*)malloc(8);
     for(int i = 0; i < 8; i++){
         name[i] = 0;
@@ -50,20 +52,23 @@ void CoffFile::add_section(std::string name_str, int32_t flags, RelocationTable&
     int name_length = (8>name_str.length())?name_str.length():8;
     for(int i = 0; i < name_length; i++){
         name[i] = name_str[i];
-        std::cout << name[i];
     }
-    if((flags & 0xFF) != 0x80) {
+    // Check for bss section
+    if((flags & 0xFF) != BSS_FLAG) {
+        // long ass initialization
         sh = {name, 0, 0, (long)data.size(), head.f_symptr, (long)(head.f_symptr+data.size()), 0, (unsigned short)(rt.relocations.size() + rt.future_relocations.size()), 0, flags, data};
         head.f_symptr+=data.size();
         head.f_symptr+=rt.get_size();
     } else {
+        // bss starts with nothing
         sh = {name, 0, 0, 0, 0, 0, 0, 0, 0, flags, data};
         bss_sections.push_back(sections.size()+1);
     }
     
-    // After adding a new section, every section is offset by 40
+    // After adding a new section, every section is offset by section size
     for(int i = 0; i < sections.size(); i++){
-        if((sections[i].s_flags & 0xFF) != 0x80){
+        // except bss
+        if((sections[i].s_flags & 0xFF) != BSS_FLAG){
             sections[i].s_scnptr+=40;
             sections[i].s_relptr+=40;
         }
@@ -74,6 +79,8 @@ void CoffFile::add_section(std::string name_str, int32_t flags, RelocationTable&
     rts.push_back(rt);
 
     // create section symbol
+    // only real time we need an aux
+    // TODO: Find way to make it optional
     std::string aux;
     push_aux_number(aux, sh.s_size, 4);
     push_aux_number(aux, sh.s_nreloc, 2);
@@ -86,14 +93,16 @@ symbol CoffFile::create_symbol(std::string name, unsigned long value, short scnu
                         unsigned char numaux, std::string aux){
     symbol created_symbol = {NULL,0,0,0,0,0,NULL};
     char* full_aux;
+    // needs to be bigger if we are using aux
     if(aux != ""){
+        // change type
         full_aux =  (char*)malloc(18);
         for(int i = 0; i < 18; i++){
             full_aux[i] = 0;
         }
         strcpy(full_aux, aux.c_str());
     } 
-    if(name.length() <= 8){
+    if(name.length() <= 8){ // add name normally
         char* final_name = (char*)malloc(8);
         for(int i = 0; i < 8; i++){
             if(i < name.length()){
@@ -105,22 +114,24 @@ symbol CoffFile::create_symbol(std::string name, unsigned long value, short scnu
         created_symbol = {final_name, value, scnum, type, sclass, numaux, full_aux};
     } // We need the string table otherwise
     else{
-        int offset = string_table.size();
+        int table_offset = string_table.size();
         for(int i = 0; name[i] != 0; i++){
             string_table.push_back(name[i]);
         }
         string_table.push_back(0);
         string_table_sz += name.size() + 1;
-        struct str_offset str_pointer = {0, (unsigned long)offset};
+        struct str_offset str_pointer = {0, (unsigned long)table_offset};
         sym_name sn;
         sn.e = str_pointer;
         created_symbol = {sn, value, scnum, type, sclass, numaux, full_aux};
     }
+    // if we are in bss, add to the size
     for(int i = 0; i < bss_sections.size(); i++){
         if(scnum == bss_sections[i]){
             sections[bss_sections[i]-1].s_size += 4;
         }
     }
+    // add to symbol number, double if aux is present
     head.f_nsyms += 1 + (aux == ""?0:1);                
     return created_symbol;
 }
