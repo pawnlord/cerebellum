@@ -16,4 +16,6 @@
 !assembler/tests
 !assembler/tests/*.cpp
 !assembler/tests/*.bat
+!tests
+!tests/*.bat
 !.gitignore
