@@ -6,6 +6,7 @@ int main(){
     std::cout << "version 0.2.0" << std::endl;
 
     std::vector<bfOp> ops = read_bf_file("test.bf");
+        std::cout << "op " << ops.size() << std::endl;
     AsmObject assembly = translate_bf(ops);
 
     CoffFile cf("test.asm");  

@@ -24,7 +24,7 @@ std::vector<bfOp> read_bf_file(std::string path){
     }
     std::vector<bfOp> operations;
     for(int i = 0; i < lines.size(); i++){
-        for(int c = 0; lines[i].c_str()[0] == 0; i++){
+        for(int c = 0; lines[i].c_str()[c] != 0; c++){
             switch(lines[i][c]){
                 case '+':
                     operations.push_back(INCREMENT);
@@ -68,6 +68,7 @@ AsmObject translate_bf(std::vector<bfOp> ops){
     // Use: EDX
     assembly.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
     
+        std::cout << "op " << ops.size() << std::endl; 
     for(int i = 0; i < ops.size(); i++){
         bfOp op = ops[i];
         std::cout << "op " << i << ": " << op << std::endl; 
