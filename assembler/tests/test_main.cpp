@@ -2,31 +2,31 @@
 #include <fstream>
 
 int main(){
-    AsmObject a;
-    a.add_op_imm(0x6A, arg(0xF5, 1));
-    a.add_op_imm(0xE8, "GetStdHandle", 0x14, argsz(4));
-    a.add_op_imm(0xA3, "handle", 0x6, argsz(4));
-    a.add_op_plusr(0x50, EBP);
-    a.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
-    a.add_op_rm (0xC7, {1, EBP, EAX}, {0xA, 4, 0, 1}); // MOV [r] imm
-    a.add_op_rm (0x8B, {1, EBP, ECX}, arg(0, 1)); // mov r [r]
-    a.add_op_rm (0x89, {1, EBP, ECX}, arg(0x1, 1));
-    a.add_op_rm (0x83, {1, EBP, EAX}, {0x30, 1, 0x1, 1});
-    a.add_op_rm (0xC7, {1, EBP, EAX}, {13, 4, 0x2, 1});
-    a.add_op_rm (0xC7, {1, EBP, EAX}, {10, 4, 0x3, 1});
-    a.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, 0x4, 1});
+    AsmObject assembly;
+    assembly.add_op_imm(0x6A, arg(0xF5, 1));
+    assembly.add_op_imm(0xE8, "GetStdHandle", 0x14, argsz(4));
+    assembly.add_op_imm(0xA3, "handle", 0x6, argsz(4));
+    assembly.add_op_plusr(0x50, EBP);
+    assembly.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
+    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0xA, 4, 0, 1}); // MOV [r] imm
+    assembly.add_op_rm (0x8B, {1, EBP, ECX}, arg(0, 1)); // mov r [r]
+    assembly.add_op_rm (0x89, {1, EBP, ECX}, arg(0x1, 1));
+    assembly.add_op_rm (0x83, {1, EBP, EAX}, {0x30, 1, 0x1, 1});
+    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {13, 4, 0x2, 1});
+    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {10, 4, 0x3, 1});
+    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, 0x4, 1});
      
-    a.add_op_imm(0x6A, arg(0x0, 1));
-    a.add_op_imm(0x68, "dummy", 0x6, argsz(4));
-    a.add_op_imm(0x6A, arg(0x1, 1));
-    a.add_op_rm (0x8D, {1, EBP, ECX}, arg(0x1, 1));
-    a.add_op_plusr(0x50, ECX);
-    a.add_op_rm (0xFF, {0, 5, ESI}, "handle", 0x6, argsz(4));
-    a.add_op_imm(0xE8, "WriteConsoleA", 0x14, argsz(4));
+    assembly.add_op_imm(0x6A, arg(0x0, 1));
+    assembly.add_op_imm(0x68, "dummy", 0x6, argsz(4));
+    assembly.add_op_imm(0x6A, arg(0x1, 1));
+    assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(0x1, 1));
+    assembly.add_op_plusr(0x50, ECX);
+    assembly.add_op_rm (0xFF, {0, 5, ESI}, "handle", 0x6, argsz(4));
+    assembly.add_op_imm(0xE8, "WriteConsoleA", 0x14, argsz(4));
     
     
-    a.add_op_imm(0x6A, arg(0x0, 1));
-    a.add_op_imm(0xE8, "ExitProcess", 0x14, argsz(4));
+    assembly.add_op_imm(0x6A, arg(0x0, 1));
+    assembly.add_op_imm(0xE8, "ExitProcess", 0x14, argsz(4));
     std::cout << "declared a" << std::endl;
 
     // used symbols
@@ -51,7 +51,7 @@ int main(){
     }));
     cf.add_section(".bss\0\0\0\0", 0xC0300080, null_rt, std::vector<unsigned char>({}));
 
-    cf.add_section(".text\0\0\0", 0x60500020, a.rt, a.code);
+    cf.add_section(".text\0\0\0", 0x60500020, assembly.rt, assembly.code);
     
 
     cf.compile();

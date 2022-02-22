@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include "assembler.h"
 
 typedef enum {
     // ECX: program pointer
@@ -21,5 +22,6 @@ typedef enum {
 
 std::vector<bfOp> read_bf_file(std::string path);
 
+AsmObject translate_bf(std::vector<bfOp> ops);
 
 #endif
