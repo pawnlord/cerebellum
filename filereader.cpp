@@ -83,6 +83,9 @@ AsmObject translate_bf(std::vector<bfOp> ops){
             case INCREMENT:
                 assembly.add_op_rm (0x83, {1, EBP, EAX}, {0x1, 1, pointer, 1});
                 break;
+            case DECREMENT:
+                assembly.add_op_rm (0x83, {1, EBP, EAX}, {-0x1, 1, pointer, 1});
+                break;
             case OUTPUT:
                 // Print Instructions
                 assembly.add_op_imm(0x6A, arg(0x0, 1));
