@@ -16,10 +16,12 @@ int main(){
     cf.add_symbol("ExitProcess", 0, 0, 0, 0x2, 0, "");
     cf.add_symbol("GetStdHandle", 0, 0, 0, 0x2, 0, "");
     cf.add_symbol("WriteConsoleA", 0, 0, 0, 0x2, 0, "");
+    cf.add_symbol("ReadConsoleA", 0, 0, 0, 0x2, 0, ""); 
     cf.add_symbol("msg", 0, 1, 0, 0x3, 0, "");
     cf.add_symbol("msg.len", 0xF, -1, 0, 0x3, 0, "");
     cf.add_symbol("dummy", 0, 2, 0, 0x3, 0, "");
     cf.add_symbol("out_handle", 4, 2, 0, 0x3, 0, "");
+    cf.add_symbol("in_handle", 8, 2, 0, 0x3, 0, "");
     cf.add_symbol("main", 0, 3, 0, 0x2, 0, "");
     cf.add_symbol("@feat.00", 1, -1, 0, 0x3, 0, ""); // TODO: automate
 

@@ -36,7 +36,7 @@ std::vector<bfOp> read_bf_file(std::string path){
                     operations.push_back(RIGHT);
                 break;
                 case '<':
-                    operations.push_back(RIGHT);
+                    operations.push_back(LEFT);
                 break;
                 case '.':
                     operations.push_back(OUTPUT);
@@ -60,15 +60,21 @@ AsmObject translate_bf(std::vector<bfOp> ops){
     AsmObject assembly;
     int pointer = 0;
     // get handle
+    assembly.add_op_imm(0x6A, arg(0xF6, 1));
+    assembly.add_op_imm(0xE8, "GetStdHandle", 0x14, argsz(4));
+    assembly.add_op_imm(0xA3, "in_handle", 0x6, argsz(4));
+
     assembly.add_op_imm(0x6A, arg(0xF5, 1));
     assembly.add_op_imm(0xE8, "GetStdHandle", 0x14, argsz(4));
     assembly.add_op_imm(0xA3, "out_handle", 0x6, argsz(4));
+
+    assembly.add_op_plusr(0x50, EBP);
 
     assembly.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
     
     // initialize value 
     assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, 0x0, 1}); // MOV [r] imm
-    
+
     for(int i = 0; i < ops.size(); i++){
         bfOp op = ops[i];
         std::cout << "op " << i << ": " << op << std::endl; 
@@ -84,8 +90,18 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 assembly.add_op_imm(0x6A, arg(0x1, 1));
                 assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(pointer, 1));
                 assembly.add_op_plusr(0x50, ECX);
-                assembly.add_op_rm (0xFF, {0, 5, ESI}, "out_handle", 0x6, argsz(4));
+                assembly.add_op_rm (0xFF, {0, EBP, ESI}, "out_handle", 0x6, argsz(4));
                 assembly.add_op_imm(0xE8, "WriteConsoleA", 0x14, argsz(4));
+                break;
+            case INPUT:
+                // Input Instructions
+                assembly.add_op_imm(0x6A, arg(0x0, 1));
+                assembly.add_op_imm(0x68, "dummy", 0x6, argsz(4));
+                assembly.add_op_imm(0x6A, arg(0x1, 1));
+                assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(pointer, 1));
+                assembly.add_op_plusr(0x50, ECX);
+                assembly.add_op_rm (0xFF, {0, EBP, ESI}, "in_handle", 0x6, argsz(4));
+                assembly.add_op_imm(0xE8, "ReadConsoleA", 0x14, argsz(4));
                 break;
         }
     }
