@@ -105,10 +105,24 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 assembly.add_op_plusr(0x50, ECX);
                 assembly.add_op_rm (0xFF, {0, EBP, ESI}, "in_handle", 0x6, argsz(4));
                 assembly.add_op_imm(0xE8, "ReadConsoleA", 0x14, argsz(4));
+
+                // clean up input buffer
+                assembly.add_op_rm (0xFF, {0, EBP, ESI}, "in_handle", 0x6, argsz(4));
+                assembly.add_op_imm(0xE8, "FlushConsoleInputBuffer", 0x14, argsz(4));
+                break;
+            case RIGHT:
+                pointer += 1;
+                break;
+            case LEFT:
+                if(pointer != 0){
+                    pointer -= 1;
+                } else {
+                    std::cerr << "[cerebellum: COMPILE WARNING] Shifted to far left." << std::endl;
+                }
                 break;
         }
     }
-    assembly.add_op_imm(0x6A, arg(0x0, 1));
+    assembly.add_op_rm (0xFF, {3, EAX, EAX}, argsz(0));
     assembly.add_op_imm(0xE8, "ExitProcess", 0x14, argsz(4));
     return assembly;
 }
