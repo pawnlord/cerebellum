@@ -59,6 +59,8 @@ std::vector<bfOp> read_bf_file(std::string path){
 AsmObject translate_bf(std::vector<bfOp> ops){
     AsmObject assembly;
     int pointer = 0;
+    int allocated_memory = 0;
+    std::vector<int> loop_positions;
     // get handle
     assembly.add_op_imm(0x6A, arg(0xF6, 1));
     assembly.add_op_imm(0xE8, "GetStdHandle", 0x14, argsz(4));
@@ -69,9 +71,10 @@ AsmObject translate_bf(std::vector<bfOp> ops){
     assembly.add_op_imm(0xA3, "out_handle", 0x6, argsz(4));
 
     assembly.add_op_plusr(0x50, EBP);
-
+    // Allocate 255 bytes
     assembly.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
     
+
     // initialize value 
     assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, 0x0, 1}); // MOV [r] imm
 
@@ -112,13 +115,28 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 break;
             case RIGHT:
                 pointer += 1;
+                if(pointer > allocated_memory) {
+                    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, pointer, 1}); // MOV [r] imm
+                }
+                allocated_memory += 1;
                 break;
             case LEFT:
-                if(pointer != 0){
+                if(pointer != 0 || pointer == 0){
                     pointer -= 1;
                 } else {
                     std::cerr << "[cerebellum: COMPILE WARNING] Shifted to far left." << std::endl;
                 }
+                break;
+            case BEGIN_LOOP:
+                loop_positions.push_back(assembly.code.size()); // get current position to refer back to later
+                break;
+            case END_LOOP:
+                assembly.add_op_rm(83, {1, EBP, EDI}, {0, 1, 0, 1}); // CMP
+                int loop_pos = loop_positions.back();
+                loop_positions.pop_back();
+                int current_pos = assembly.code.size();
+                int offset = loop_pos-(current_pos+2); // account for added bytes
+                assembly.add_op_imm(0x75, arg(offset, 1)); // HNO
                 break;
         }
     }

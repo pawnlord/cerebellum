@@ -4,6 +4,7 @@
 #include "coff_file.h"
 #define arg(data, sz) {data, sz, 0, 0}
 #define argsz(sz) {0,sz,0,0}
+#define rm_op(ext_op) {(ext_op>>6)%0b100,ext_op%0b1000, (register_e)((ext_op>>3)%0b1000)}
 
 typedef unsigned char uchar;
 typedef unsigned char uint;
