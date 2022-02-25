@@ -83,17 +83,17 @@ AsmObject translate_bf(std::vector<bfOp> ops){
         switch (op)
         {
             case INCREMENT:
-                assembly.add_op_rm (0x83, {1, EBP, EAX}, {0x1, 1, pointer, 1});
+                assembly.add_op_rm (0x83, {1, EBP, EAX}, {0x1, 1, 0, 1});
                 break;
             case DECREMENT:
-                assembly.add_op_rm (0x83, {1, EBP, EAX}, {-0x1, 1, pointer, 1});
+                assembly.add_op_rm (0x83, {1, EBP, EAX}, {-0x1, 1, 0, 1});
                 break;
             case OUTPUT:
                 // Print Instructions
                 assembly.add_op_imm(0x6A, arg(0x0, 1));
                 assembly.add_op_imm(0x68, "dummy", 0x6, argsz(4));
                 assembly.add_op_imm(0x6A, arg(0x1, 1));
-                assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(pointer, 1));
+                assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(0, 1));
                 assembly.add_op_plusr(0x50, ECX);
                 assembly.add_op_rm (0xFF, {0, EBP, ESI}, "out_handle", 0x6, argsz(4));
                 assembly.add_op_imm(0xE8, "WriteConsoleA", 0x14, argsz(4));
@@ -103,7 +103,7 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 assembly.add_op_imm(0x6A, arg(0x0, 1));
                 assembly.add_op_imm(0x68, "dummy", 0x6, argsz(4));
                 assembly.add_op_imm(0x6A, arg(0x1, 1));
-                assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(pointer, 1));
+                assembly.add_op_rm (0x8D, {1, EBP, ECX}, arg(0, 1));
                 assembly.add_op_plusr(0x50, ECX);
                 assembly.add_op_rm (0xFF, {0, EBP, ESI}, "in_handle", 0x6, argsz(4));
                 assembly.add_op_imm(0xE8, "ReadConsoleA", 0x14, argsz(4));
@@ -113,13 +113,16 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 assembly.add_op_imm(0xE8, "FlushConsoleInputBuffer", 0x14, argsz(4));
                 break;
             case RIGHT:
+                assembly.add_op_plusr(0x40, EBP);
                 pointer += 1;
                 if(pointer > allocated_memory) {
-                    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, pointer, 1}); // MOV [r] imm
+                    assembly.add_op_rm (0xC7, {1, EBP, EAX}, {0x0, 4, 0, 1}); // MOV [r] imm
                 }
                 allocated_memory += 1;
                 break;
             case LEFT:
+                assembly.add_op_plusr(0x48, EBP);
+                
                 if(pointer != 0 || pointer == 0){
                     pointer -= 1;
                 } else {
@@ -130,7 +133,7 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 loop_positions.push_back(assembly.code.size()); // get current position to refer back to later
                 break;
             case END_LOOP:
-                assembly.add_op_rm(0x80, {1, EBP, EDI}, {0, 1, pointer, 1}); // CMP
+                assembly.add_op_rm(0x80, {1, EBP, EDI}, {0, 1, 0, 1}); // CMP
 
                 int loop_pos = loop_positions.back();
                 loop_positions.pop_back();
