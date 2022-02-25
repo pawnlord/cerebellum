@@ -2,6 +2,7 @@
 !*.cpp
 !*.h
 !*.md
+!*.bat
 !coff
 !coff/*.cpp
 !coff/*.h
