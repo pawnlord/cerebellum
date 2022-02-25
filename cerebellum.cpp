@@ -38,12 +38,12 @@ int main(int argc, char **argv){
     }
 
     std::cout << "cerebellum: brainfuck compiler for windows" << std::endl;
-    std::cout << "version 1.0.0" << std::endl;
+    std::cout << "version 1.1.0" << std::endl;
 
     if(cl_arguments.version_flag){
         return 0;
     }
-    
+
     if(cl_arguments.input_name == ""){
         std::cerr << "[cerebellum: COMPILE ERROR] No input file given." << std::endl;
         return 1;
