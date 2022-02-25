@@ -3,7 +3,7 @@
 
 int main(){
     std::cout << "cerebellum: brainfuck compiler for windows" << std::endl;
-    std::cout << "version 0.2.0" << std::endl;
+    std::cout << "version 1.0.0" << std::endl;
 
     std::vector<bfOp> ops = read_bf_file("test.bf");
         std::cout << "op " << ops.size() << std::endl;
