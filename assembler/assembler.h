@@ -69,5 +69,6 @@ class AsmObject {
      * push single byte for nonspecific instructions
     */
     void add_byte(uchar op); // for anything we dont include
+    void change_number(int position, int number, int size);
     std::vector<uchar> code;
 };

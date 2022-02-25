@@ -130,17 +130,25 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 }
                 break;
             case BEGIN_LOOP:
+                assembly.add_op_imm(0xE9, arg(0, 4));
                 loop_positions.push_back(assembly.code.size()); // get current position to refer back to later
+                                                                // change the number later
                 break;
             case END_LOOP:
-                assembly.add_op_rm(0x80, {1, EBP, EDI}, {0, 1, 0, 1}); // CMP
 
                 int loop_pos = loop_positions.back();
                 loop_positions.pop_back();
+                // send the begin loop here first
                 int current_pos = assembly.code.size();
-                int offset = loop_pos-(current_pos+6); // account for added bytes
+                int offset_from = current_pos-loop_pos;
+                assembly.change_number(loop_pos-4, offset_from, 4);
+
+                assembly.add_op_rm(0x80, {1, EBP, EDI}, {0, 1, 0, 1}); // CMP
+
+                current_pos = assembly.code.size();
+                int offset_to = loop_pos-(current_pos+6); // account for added bytes
                 assembly.add_byte(0x0f);
-                assembly.add_op_imm(0x85, arg(offset, 4)); // JMP
+                assembly.add_op_imm(0x85, arg(offset_to, 4)); // JMP
                 break;
         }
     }

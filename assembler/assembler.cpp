@@ -49,3 +49,11 @@ void AsmObject::add_byte(uchar op){
 void AsmObject::add_op_plusr(uchar op, register_e reg){
     code.push_back(op+reg);
 }
+void AsmObject::change_number(int position, int number, int size){
+    std::vector<uchar> vec_number;
+    push_back_number(vec_number, number, size);
+
+    for(int i = 0; i < size; i++){
+        code[i+position] = vec_number[i];
+    }
+}
