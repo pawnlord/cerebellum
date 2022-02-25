@@ -139,7 +139,6 @@ AsmObject translate_bf(std::vector<bfOp> ops){
                 loop_positions.pop_back();
                 int current_pos = assembly.code.size();
                 int offset = loop_pos-(current_pos+6); // account for added bytes
-                std::cout << "end loop" << std::hex << (int) offset << std::endl;
                 assembly.add_byte(0x0f);
                 assembly.add_op_imm(0x85, arg(offset, 4)); // JMP
                 break;

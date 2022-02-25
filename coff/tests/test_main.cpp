@@ -39,7 +39,7 @@ int main(){
     std::cout << "sections made" << std::endl;
     
 
-    cf.compile();
+    cf.compile(true);
     std::cout << "compiled" << std::endl;
 
     std::string data = cf.get_compiled();

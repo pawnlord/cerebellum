@@ -54,7 +54,7 @@ int main(){
     cf.add_section(".text\0\0\0", 0x60500020, assembly.rt, assembly.code);
     
 
-    cf.compile();
+    cf.compile(true);
     std::cout << "compiled" << std::endl;
 
     std::string data = cf.get_compiled();

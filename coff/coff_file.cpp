@@ -164,7 +164,7 @@ void CoffFile::fill_reloc_table(RelocationTable& t){
     }
 }
 
-void CoffFile::compile(){
+void CoffFile::compile(bool verbose){
     data.clear();
     // compile header
     coff_pbn(head.f_magic, 2);
@@ -190,7 +190,7 @@ void CoffFile::compile(){
         coff_pbn(sections[i].s_nlnno, 2);
         coff_pbn(sections[i].s_flags, 4);
     }
-    std::cout << "Section headers compiled" << std::endl;
+    if (verbose) { std::cout << "Section headers compiled" << std::endl; }
     std::vector<char> rdata;
     for(int i = 0; i < sections.size(); i++){
         data.insert(data.end(), sections[i].data.begin(), sections[i].data.end());
@@ -198,7 +198,7 @@ void CoffFile::compile(){
         rdata = rts[i].get_data();
         data.insert(data.end(), rdata.begin(), rdata.end()); // TODO: possible error
     }
-    std::cout << "Sections compiled" << std::endl;
+    if (verbose) { std::cout << "Sections compiled" << std::endl; }
     for(int i = 0; i < symbols.size(); i++){
         if(symbols[i].e.e.e_zeroes != 0){
             for(int j = 0; j < 8; j++){
@@ -219,7 +219,7 @@ void CoffFile::compile(){
             }
         }
     }
-    std::cout << "Symbols compiled" << std::endl;
+    if (verbose) { std::cout << "Symbols compiled" << std::endl; }
     
     // set string table size.
     for(int i = 0; i < 4; i++){
@@ -227,10 +227,10 @@ void CoffFile::compile(){
     }
 
     data.insert(data.end(), string_table.begin(), string_table.end());
-    std::cout << "String table added" << std::endl;
+    if (verbose) { std::cout << "String table added" << std::endl; }
 
 
-    std::cout << "Compiled. size of data: " << data.size() << std::endl;
+    if (verbose) { std::cout << "Compiled. size of data: " << data.size() << std::endl; }
 }
 
 std::string CoffFile::get_compiled(){

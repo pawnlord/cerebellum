@@ -1,5 +1,7 @@
 #include "filereader.h"
 #include <fstream>
+#include <chrono>
+using namespace std::chrono;
 
 struct {
     bool version_flag;
@@ -26,12 +28,10 @@ int main(int argc, char **argv){
         } else if(strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0){
             has_flag = true;
         } else {
-                std::cout << argv[i] << has_flag << "\n";
             if (has_flag){
                 cl_arguments.output_name = argv[i];
             } else {
                 cl_arguments.input_name = argv[i];
-                std::cout << cl_arguments.input_name << "\n";
             }
             has_flag = false;
         }
@@ -39,7 +39,6 @@ int main(int argc, char **argv){
 
     std::cout << "cerebellum: brainfuck compiler for windows" << std::endl;
     std::cout << "version 1.1.0" << std::endl;
-
     if(cl_arguments.version_flag){
         return 0;
     }
@@ -48,10 +47,21 @@ int main(int argc, char **argv){
         std::cerr << "[cerebellum: COMPILE ERROR] No input file given." << std::endl;
         return 1;
     }
+    
+    milliseconds ms = duration_cast< milliseconds >(
+        system_clock::now().time_since_epoch()
+    );
+    long long t_start = ms.count();
 
     std::vector<bfOp> ops = read_bf_file(cl_arguments.input_name);
-        std::cout << "op " << ops.size() << std::endl;
     AsmObject assembly = translate_bf(ops);
+    if(cl_arguments.verbose_flag) { 
+        ms = duration_cast< milliseconds >(
+            system_clock::now().time_since_epoch()
+        );
+        std::cout << "Assembly finished (" << ms.count() - t_start << "ms)\n";
+        t_start = ms.count();
+    }
 
     CoffFile cf(cl_arguments.input_name);  
     cf.add_symbol(".absolut", 0, -1, 0, 0x3, 0, "");
@@ -78,7 +88,15 @@ int main(int argc, char **argv){
     cf.add_section(".text\0\0\0", 0x60500020, assembly.rt, assembly.code);
     
 
-    cf.compile();
+    cf.compile(cl_arguments.verbose_flag);
+
+    if(cl_arguments.verbose_flag) { 
+        ms = duration_cast< milliseconds >(
+            system_clock::now().time_since_epoch()
+        );
+        std::cout << "Compiling finished (" << ms.count() - t_start << "ms)\n";
+        t_start = ms.count();
+    }
 
     std::string data = cf.get_compiled();
     std::ofstream out (cl_arguments.output_name, std::ios::binary);

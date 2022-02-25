@@ -22,7 +22,7 @@ class CoffFile {
     // Fill a relocation table with its future relocations
     // In order to not have relocations that are made invalid by future symbols
     void fill_reloc_table(RelocationTable& t);
-    void compile();
+    void compile(bool verbose);
     std::string get_compiled();
     relocation get_relocation(std::string symname, int vaddr, int type);
     private:
