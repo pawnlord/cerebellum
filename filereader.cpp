@@ -72,6 +72,8 @@ AsmObject translate_bf(std::vector<bfOp> ops){
 
     assembly.add_op_plusr(0x50, EBP);
     // Allocate 255 bytes
+    assembly.add_op_rm (0x81, {3, ESP, EBP}, arg(1000, 4)); // MOV r r
+    
     assembly.add_op_rm (0x89, {3, EBP, ESP}, argsz(0)); // MOV r r
     
 
