@@ -85,10 +85,10 @@ AsmObject translate_bf(std::vector<bfOp> ops){
         switch (op)
         {
             case INCREMENT:
-                assembly.add_op_rm (0x83, {1, EBP, EAX}, {0x1, 1, 0, 1});
+                assembly.add_op_rm (0x80, {1, EBP, EAX}, {0x1, 1, 0, 1});
                 break;
             case DECREMENT:
-                assembly.add_op_rm (0x83, {1, EBP, EAX}, {-0x1, 1, 0, 1});
+                assembly.add_op_rm (0x80, {1, EBP, EAX}, {-0x1, 1, 0, 1});
                 break;
             case OUTPUT:
                 // Print Instructions
