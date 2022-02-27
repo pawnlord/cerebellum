@@ -1,6 +1,6 @@
 # cerebellum
 A brainf*** compiler built in C++ for windows to learn the basics of compiling code
-version: 1.1.0
+version: 1.1.2
 
 ## usage
 ```

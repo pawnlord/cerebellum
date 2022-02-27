@@ -38,7 +38,7 @@ int main(int argc, char **argv){
     }
 
     std::cout << "cerebellum: brainfuck compiler for windows" << std::endl;
-    std::cout << "version 1.1.0" << std::endl;
+    std::cout << "version 1.1.2" << std::endl;
     if(cl_arguments.version_flag){
         return 0;
     }
